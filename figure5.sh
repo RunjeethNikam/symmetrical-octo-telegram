@@ -14,19 +14,7 @@ run () {
 	maxq=150
 
     echo "running $type experiment..."
-    echo "########################## Installing python package manager ##########################"
-    sudo apt install python3-pip -y
-    echo "########################## Installing Iper3 package ##########################"
-    sudo apt install iperf3 -y
-    echo "########################## Installing TShark package ##########################"
-    sudo apt install tshark -y
-    echo "########################## Installing Net Tools ##########################"
-    sudo apt install net-tools -y
-    echo "########################## Removing Unnessary packages ##########################"
-    sudo apt autoremove
-    echo "########################## Installing Python packages ##########################"
-    pip3 install -r requirements.txt
-    echo "##########################Done##########################"
+
     echo "########################## Retriving the Destination IP address ##########################"
     destip=`su $SUDO_USER -c "cat ~/.bbr_pair_ip"`
     python3 flows.py --fig-num 5 --time 20 --dest-ip $destip --bw-net 10 --delay 20 --maxq $maxq --environment $environment --flow-type $flowtype --dir $dir

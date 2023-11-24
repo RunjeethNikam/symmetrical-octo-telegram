@@ -1,50 +1,33 @@
 source settings.sh
 
-create_project() {
-    if [ -z "$PROJECT" ];
-    then
-	PROJECT="${PROJECT_NAME}${RANDOM}-${RANDOM}"
-	cat settings.sh | head -n 4 > settings_temp.sh
-	echo "PROJECT=$PROJECT" >> settings_temp.sh
-	mv settings_temp.sh settings.sh
-    fi
-    exists=`gcloud projects list --format json --filter "$PROJECT" | grep "\"$PROJECT\""`
-
-    if [ -z "$exists" ];
-    then
-	echo "Creating project $PROJECT"
-	gcloud projects create "$PROJECT" --name "$PROJECT_NAME" --enable-cloud-apis
-    else
-	echo "Using existing project $PROJECT"
-    fi
-
-    gcloud config set project "$PROJECT"
-
-    gcloud components install alpha
-
-    billing=`gcloud alpha billing accounts projects describe --format "get(billingEnabled)" "$PROJECT"`
-    if [ ! "$billing" = "True" ];
-    then
-	echo "Associating a billing account with $PROJECT"
-	accounts=`gcloud alpha billing accounts list --filter open=true --format "get(name,displayName)"`
-	num_accounts=`echo $accounts | wc -l`
-	if [ -z "$accounts" ];
-	then
-	    echo "Could not find a billing account to use. Please use the GCloud interface to create one and link it to the $PROJECT project"
-	    exit 1
-	fi
-	if [ "$num_accounts" = "1" ];
-	then
-	    account=`echo $accounts | cut -c 17-36`
-	else
-	    echo "Available Billing Accounts:"
-	    echo "$accounts"
-	    echo "Which account should be used for this project? [XXXXXX-XXXXXX-XXXXXX]: "
-	    read account
-	fi
-	gcloud alpha billing accounts projects link "$PROJECT" --account-id=$account
-    fi
-}
+# create_project() {
+#     gcloud config set project "$PROJECT"
+#
+#     gcloud components install alpha
+#
+#     billing=`gcloud alpha billing accounts projects describe --format "get(billingEnabled)" "$PROJECT"`
+#     if [ ! "$billing" = "True" ];
+#     then
+# 	echo "Associating a billing account with $PROJECT"
+# 	accounts=`gcloud alpha billing accounts list --filter open=true --format "get(name,displayName)"`
+# 	num_accounts=`echo $accounts | wc -l`
+# 	if [ -z "$accounts" ];
+# 	then
+# 	    echo "Could not find a billing account to use. Please use the GCloud interface to create one and link it to the $PROJECT project"
+# 	    exit 1
+# 	fi
+# 	if [ "$num_accounts" = "1" ];
+# 	then
+# 	    account=`echo $accounts | cut -c 17-36`
+# 	else
+# 	    echo "Available Billing Accounts:"
+# 	    echo "$accounts"
+# 	    echo "Which account should be used for this project? [XXXXXX-XXXXXX-XXXXXX]: "
+# 	    read account
+# 	fi
+# 	gcloud alpha billing accounts projects link "$PROJECT" --account-id=$account
+#     fi
+# }
 
 make_vm() {
     NAME=$1
@@ -104,15 +87,11 @@ link_vms() {
     PROJECT=$3
     ZONE=$4
 
-    gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME1" \
-	--command 'cat ~/.ssh/id_rsa.pub' | \
-	gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME2" \
-	--command 'cat >> ~/.ssh/authorized_keys'
+    gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME1" --command 'cat ~/.ssh/id_rsa.pub'
+	gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME2" --command 'cat >> ~/.ssh/authorized_keys'
 
-    gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME2" \
-	--command 'hostname -I' | \
-	gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME1" \
-	--command 'cat > ~/.bbr_pair_ip'
+    gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME2" --command 'hostname -I'
+	gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME1" --command 'cat > ~/.bbr_pair_ip'
 }
 
 wait_for_reboots() {
@@ -121,22 +100,22 @@ wait_for_reboots() {
     PROJECT=$3
     ZONE=$4
 
-until gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME1" --command "echo $NAME1 Rebooted!"
-do
-    echo "Waiting for $NAME1 to reboot..."
-    sleep 2
-done;
+    until gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME1" --command "echo $NAME1 Rebooted!"
+    do
+        echo "Waiting for $NAME1 to reboot..."
+        sleep 2
+    done;
 
-until gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME2" --command "echo $NAME2 Rebooted!"
-do
-    echo "Waiting for $NAME2 to reboot..."
-    sleep 2
-done;
+    until gcloud compute ssh --project "$PROJECT" --zone "$ZONE" "$NAME2" --command "echo $NAME2 Rebooted!"
+    do
+        echo "Waiting for $NAME2 to reboot..."
+        sleep 2
+    done;
 }
 
 # Comment out completed steps
 
-create_project
+#create_project
 source settings.sh
 
 make_vm ${NAME1} ${PROJECT} ${ZONE}

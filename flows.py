@@ -21,7 +21,7 @@ import socket
 parser = ArgumentParser(description="BBR Replication")
 parser.add_argument('--bw-host', '-B', type=float, help="Bandwidth of host links (Mb/s)", default=1000)
 
-parser.add_argument('--bw-net', '-b', type=float, help="Bandwidth of bottleneck (network) link (Mb/s)",  required=True)
+parser.add_argument('--bw-net', '-b', type=float, help="Bandwidth of bottleneck (network) link (Mb/s)", required=True)
 
 parser.add_argument('--delay', type=float, help="Link propagation delay (ms)", required=True)
 
@@ -49,18 +49,14 @@ args = parser.parse_args()
 
 
 class BBTopo(Topo):
-    "Simple topology for bbr experiments."
+    """Simple topology for bbr experiments."""
 
     def build(self, n=2):
         host1 = self.addHost('h1')
         host2 = self.addHost('h2')
         switch = self.addSwitch('s0')
-        link1 = self.addLink(host1, switch,
-                             bw=args.bw_host)
-        link2 = self.addLink(host2, switch, bw=args.bw_net,
-                             delay=str(args.delay) + 'ms',
-                             max_queue_size=args.maxq)
-        return
+        self.addLink(host1, switch, bw=args.bw_host)
+        self.addLink(host2, switch, bw=args.bw_net, delay=str(args.delay) + 'ms', max_queue_size=args.maxq)
 
 
 def get_ip_address(test_destination="8.8.8.8"):
@@ -132,7 +128,7 @@ def build_topology(emulator):
         data = {
             'type': 'emulator',
             'h1': {
-                'IP': get_ip_address(args.dest_ip), # local IP address
+                'IP': get_ip_address(args.dest_ip),  # local IP address
                 'popen': Popen,
             },
             'h2': {
