@@ -28,15 +28,15 @@ def read_list(fname, delim=','):
     return ret
 
 
-def ewma(alpha, values):
-    if alpha == 0:
-        return values
-    ret = []
-    prev = 0
-    for v in values:
-        prev = alpha * prev + (1 - alpha) * v
-        ret.append(prev)
-    return ret
+# def ewma(alpha, values):
+#     if alpha == 0:
+#         return values
+#     ret = []
+#     prev = 0
+#     for v in values:
+#         prev = alpha * prev + (1 - alpha) * v
+#         ret.append(prev)
+#     return ret
 
 
 def col(n, obj=None, clean=lambda e: e):
@@ -66,77 +66,77 @@ def col(n, obj=None, clean=lambda e: e):
     return None
 
 
-def transpose(l):
-    return zip(*l)
-
-
-def avg(lst):
-    return sum(map(float, lst)) / len(lst)
-
-
-def stdev(lst):
-    mean = avg(lst)
-    var = avg(list(map(lambda e: (e - mean) ** 2, lst)))
-    return math.sqrt(var)
-
-
-def xaxis(values, limit):
-    l = len(values)
-    return zip(*map(lambda x, y: (x * 1.0 * limit / l, y), enumerate(values)))
-
-
-def grouper(n, iterable, fillvalue=None):
-    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
-    args = [iter(iterable)] * n
-    return itertools.zip_longest(fillvalue=fillvalue, *args)
-
-
-def cdf(values):
-    values.sort()
-    prob = 0
-    l = len(values)
-    x, y = [], []
-
-    for v in values:
-        prob += 1.0 / l
-        x.append(v)
-        y.append(prob)
-
-    return (x, y)
-
-
-def parse_cpu_usage(fname, nprocessors=8):
-    """Returns (user,system,nice,iowait,hirq,sirq,steal) tuples
-    aggregated over all processors.  DOES NOT RETURN IDLE times."""
-
-    data = grouper(nprocessors, open(fname).readlines())
-
-    """Typical line looks like:
-    Cpu0  :  0.0%us,  1.0%sy,  0.0%ni, 97.0%id,  0.0%wa,  0.0%hi,  2.0%si,  0.0%st
-    """
-    ret = []
-    for collection in data:
-        total = [0] * 8
-        for cpu in collection:
-            usages = cpu.split(':')[1]
-            usages = list(map(lambda e: e.split('%')[0], usages.split(',')))
-            for i in range(len(usages)):
-                total[i] += float(usages[i])
-        total = list(map(lambda t: t / nprocessors, total))
-        # Skip idle time
-        ret.append(total[0:3] + total[4:])
-    return ret
-
-
-def pc95(lst):
-    l = len(lst)
-    return sorted(lst)[int(0.95 * l)]
-
-
-def pc99(lst):
-    l = len(lst)
-    return sorted(lst)[int(0.99 * l)]
-
-
-def coeff_variation(lst):
-    return stdev(lst) / avg(lst)
+# def transpose(l):
+#     return zip(*l)
+#
+#
+# def avg(lst):
+#     return sum(map(float, lst)) / len(lst)
+#
+#
+# def stdev(lst):
+#     mean = avg(lst)
+#     var = avg(list(map(lambda e: (e - mean) ** 2, lst)))
+#     return math.sqrt(var)
+#
+#
+# def xaxis(values, limit):
+#     l = len(values)
+#     return zip(*map(lambda x, y: (x * 1.0 * limit / l, y), enumerate(values)))
+#
+#
+# def grouper(n, iterable, fillvalue=None):
+#     "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+#     args = [iter(iterable)] * n
+#     return itertools.zip_longest(fillvalue=fillvalue, *args)
+#
+#
+# def cdf(values):
+#     values.sort()
+#     prob = 0
+#     l = len(values)
+#     x, y = [], []
+#
+#     for v in values:
+#         prob += 1.0 / l
+#         x.append(v)
+#         y.append(prob)
+#
+#     return (x, y)
+#
+#
+# def parse_cpu_usage(fname, nprocessors=8):
+#     """Returns (user,system,nice,iowait,hirq,sirq,steal) tuples
+#     aggregated over all processors.  DOES NOT RETURN IDLE times."""
+#
+#     data = grouper(nprocessors, open(fname).readlines())
+#
+#     """Typical line looks like:
+#     Cpu0  :  0.0%us,  1.0%sy,  0.0%ni, 97.0%id,  0.0%wa,  0.0%hi,  2.0%si,  0.0%st
+#     ""
+#     ret = []
+#     for collection in data:
+#         total = [0] * 8
+#         for cpu in collection:
+#             usages = cpu.split(':')[1]
+#             usages = list(map(lambda e: e.split('%')[0], usages.split(',')))
+#             for i in range(len(usages)):
+#                 total[i] += float(usages[i])
+#         total = list(map(lambda t: t / nprocessors, total))
+#         # Skip idle time
+#         ret.append(total[0:3] + total[4:])
+#     return ret
+#
+#
+# def pc95(lst):
+#     l = len(lst)
+#     return sorted(lst)[int(0.95 * l)]
+#
+#
+# def pc99(lst):
+#     l = len(lst)
+#     return sorted(lst)[int(0.99 * l)]
+#
+#
+# def coeff_variation(lst):
+#     return stdev(lst) / avg(lst)

@@ -1,27 +1,14 @@
-'''
-Plot ping RTTs over time
-'''
 from helper import *
-import plot_defaults
 
 from matplotlib.ticker import LinearLocator
 from pylab import figure
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--files', '-f',
-                    help="Ping output files to plot",
-                    required=True,
-                    action="store",
-                    nargs='+')
+parser.add_argument('--files', '-f', help="Ping output files to plot", required=True, action="store", nargs='+')
 
-parser.add_argument('--xlimit',
-                    help="Upper limit of x axis, data after ignored",
-                    type=float,
-                    default=8)
+parser.add_argument('--xlimit', help="Upper limit of x axis, data after ignored", type=float, default=8)
 
-parser.add_argument('--out', '-o',
-                    help="Output png file for the plot.",
-                    default=None)  # Will show the plot
+parser.add_argument('--out', '-o', help="Output png file for the plot.", default=None)
 
 args = parser.parse_args()
 
@@ -30,6 +17,9 @@ fig = figure()
 ax = fig.add_subplot(111)
 for i, f in enumerate(args.files):
     data = read_list(f)
+    print('##############################')
+    print(data)
+    print('##############################')
     xaxis = list(map(float, col(0, data)))
     rtts = list(map(float, col(1, data)))
     xaxis = [x - xaxis[0] for x in xaxis]
