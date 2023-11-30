@@ -1,4 +1,4 @@
-PROJECT_NAME=burnished-ember-405203
+# PROJECT_NAME=temp-406707
 ZONE=us-west1-a
 NAME1=bbrtest1
 NAME2=bbrtest2

@@ -134,10 +134,6 @@ def start_tcpprobe(outfile="cwnd.txt"):
           shell=True)
 
 
-def stop_tcpprobe():
-    Popen("killall -9 cat", shell=True).wait()
-
-
 def start_capture(outfile="capture.dmp"):
     monitor = Process(target=capture_packets,
                       args=("", outfile))
@@ -240,17 +236,7 @@ def run(action):
         os.makedirs(args.dir)
 
     net = build_topology()
-    if action:
-        action(net)
-
-    # Hint: The command below invokes a CLI which you can use to
-    # debug.  It allows you to run arbitrary commands inside your
-    # emulated hosts h1 and h2.
-    # CLI(net['obj'])
-
-    if net['obj'] is not None and net['cleanupfn']:
-        net['cleanupfn']()
-
+    action(net)
 
 # Display a countdown to the user to show time remaining.
 def display_countdown(nseconds):

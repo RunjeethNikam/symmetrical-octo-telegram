@@ -4,7 +4,7 @@ uname -a
 echo "Installing Iperf3"
 sudo apt install iperf3 -y
 echo "Installing TShark"
-sudo apt install tshark -y
+# sudo apt install tshark -y
 echo "Installing Net Tools"
 sudo apt install net-tools -y
 echo "Installing Unzip"

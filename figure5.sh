@@ -19,7 +19,7 @@ run () {
     echo "################ Done #####################"
     echo "Getting the metrics"
 	pip3 install -r requirements.txt
-    python3 flows.py --time 20 --dest-ip $destip --bw-net 10 --delay 20 --maxq $maxq --environment vms --flow-type iperf --dir $dir
+    python3 flows.py --time 20 --dest-ip $destip --bw-net 10 --delay 35 --maxq $maxq --environment vms --flow-type iperf --dir $dir
     chmod -R 0777 $dir
     echo "Done"
 
@@ -29,7 +29,7 @@ run () {
     echo "########################## Done ##########################"
 
     echo "########################## Plotting the results ##########################"
-    python3 plot_ping.py -f $dir/bbr_rtt.txt $dir/cubic_rtt.txt --xlimit 20 -o $dir/figure5_$type.png
+    python3 plot_ping.py -f $dir/bbr_rtt.txt $dir/cubic_rtt.txt --xlimit 35 -o $dir/figure5_$type.png
     echo "########################## Done ##########################"
 }
 
