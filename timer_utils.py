@@ -1,25 +1,24 @@
 from time import sleep, time
 
 
-def display_countdown(nseconds):
+def display_countdown(ns):
     """
     Display a countdown to the user to show time remaining.
 
     Parameters:
     - nseconds: Total duration of the countdown in seconds.
     """
-    start_time = time()
-    sleep_interval = 5
+    st = time()
+    sleep_itv = 6
 
-    while True:
-        sleep(sleep_interval)
-        elapsed_time = time() - start_time
+    while 1:
+        sleep(sleep_itv)
+        et = time() - st
 
-        if elapsed_time > nseconds:
-            break
+        if et > ns: break
 
-        time_remaining = nseconds - elapsed_time
-        print(f"{time_remaining:.1f}s left...")
+        time_remaining = ns - et
+        print(f"{time_remaining:.1f}s to go")
 
 # Example usage:
 # display_countdown(60)
