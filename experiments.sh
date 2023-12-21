@@ -15,7 +15,7 @@ gcloud compute ssh  --zone "$ZONE" --project "$GCLOUD_PROJECT" "$HOST_1" --comma
 
 # Download generated figures from the remote VM
 echo "Downloading the figures from $HOST_1"
-gcloud compute scp --recurse --zone "$ZONE" --project "$GCLOUD_PROJECT" "$HOST_1:~/experiment/figures" ./
+gcloud compute scp --recurse --zone "$ZONE" --project "$GCLOUD_PROJECT" "$HOST_1:~/experiment/experiment_results" ./
 
 # Display completion message
 echo "Experiments completed successfully."
