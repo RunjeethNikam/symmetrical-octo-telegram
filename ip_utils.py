@@ -36,5 +36,5 @@ def start_ping(host1, host2, duration=60, output_filename="ping_results.txt", di
 
 # Example usage:
 # local_ip = get_local_ip_address()
-# network_config = {"h1": {"IP": local_ip}, "h2": {"IP": "192.168.1.2"}}
-# start_ping(network_config["h1"]["IP"], network_config["h2"]["IP"])
+# network_config = {"host_1": {"IP": local_ip}, "host_2": {"IP": "192.168.1.2"}}
+# start_ping(network_config["host_1"]["IP"], network_config["host_2"]["IP"])

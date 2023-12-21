@@ -43,8 +43,8 @@ def run_experiment(args):
         Returns:
         - List of flow configurations.
         """
-        source_host = network["h1"]
-        destination_host = network["h2"]
+        source_host = network["host_1"]
+        destination_host = network["host_2"]
 
         flows = []
         base_port = 9999
