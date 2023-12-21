@@ -1,16 +1,11 @@
-#!/bin/bash
 
-# Note: Mininet must be run as root.  So invoke this shell script
-# using sudo.
 
 oldpwd=$PWD
 dir=${1:-bonus}
 mkdir -p $dir
 rm -rf $dir/*
 
-#!/bin/bash
 
-# This shell script must be run using sudo.
 
 run () {
     type=$1
