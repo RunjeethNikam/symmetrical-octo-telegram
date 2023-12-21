@@ -1,33 +1,6 @@
 source settings.sh
 
-# create_project() {
-#     gcloud config set project "$PROJECT"
-#
-#     gcloud components install alpha
-#
-#     billing=`gcloud alpha billing accounts projects describe --format "get(billingEnabled)" "$PROJECT"`
-#     if [ ! "$billing" = "True" ];
-#     then
-# 	echo "Associating a billing account with $PROJECT"
-# 	accounts=`gcloud alpha billing accounts list --filter open=true --format "get(name,displayName)"`
-# 	num_accounts=`echo $accounts | wc -l`
-# 	if [ -z "$accounts" ];
-# 	then
-# 	    echo "Could not find a billing account to use. Please use the GCloud interface to create one and link it to the $PROJECT project"
-# 	    exit 1
-# 	fi
-# 	if [ "$num_accounts" = "1" ];
-# 	then
-# 	    account=`echo $accounts | cut -c 17-36`
-# 	else
-# 	    echo "Available Billing Accounts:"
-# 	    echo "$accounts"
-# 	    echo "Which account should be used for this project? [XXXXXX-XXXXXX-XXXXXX]: "
-# 	    read account
-# 	fi
-# 	gcloud alpha billing accounts projects link "$PROJECT" --account-id=$account
-#     fi
-# }
+
 
 make_vm() {
     NAME=$1
@@ -113,9 +86,7 @@ wait_for_reboots() {
     done;
 }
 
-# Comment out completed steps
 
-#create_project
 source settings.sh
 
 make_vm ${NAME1} ${PROJECT} ${ZONE}
