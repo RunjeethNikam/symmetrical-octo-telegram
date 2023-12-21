@@ -19,141 +19,142 @@ def run_experiment(args):
     - args: Command-line arguments specifying experiment parameters.
     """
 
-    def start_flows(
-        nw,
-        number_of_flows,
+    def setup_iperf_flows(
+        network,
+        num_flows,
         time_between_flows,
         flow_type,
-        cc,
+        congestion_controls,
         pre_experiment_action=None,
         experiment_monitor=None,
     ):
         """
-        Start multiple flows for the network experiment.
+        Set up and start multiple flows for the network experiment using iperf.
 
         Parameters:
-        - net: Network configuration.
+        - network: Network configuration.
         - num_flows: Number of flows to start.
-        - time_btwn_flows: Time between starting each flow.
+        - time_between_flows: Time between starting each flow.
         - flow_type: Type of flow (e.g., 'iperf').
-        - cong: List of congestion control algorithms for each flow.
-        - pre_flow_action: Pre-flow action to perform.
-        - flow_monitor: Flow monitoring function.
+        - congestion_controls: List of congestion control algorithms for each flow.
+        - pre_experiment_action: Pre-flow action to perform.
+        - experiment_monitor: Flow monitoring function.
 
         Returns:
         - List of flow configurations.
         """
-        host_1 = nw["h1"]
-        host_2 = nw["h2"]
+        source_host = network["h1"]
+        destination_host = network["h2"]
 
         flows = []
-        basic_port = 1234
+        base_port = 1234
 
         print("Setting up the Iperf configuration")
-        iperf_conf_setup(host_2, basic_port)
+        iperf_conf_setup(destination_host, base_port)
         flow_commands = iperf_commands
 
-        def start_experiment(i):
-            pre_experiment_action(nw, i, basic_port + i)
+        def start_single_flow(i):
+            pre_experiment_action(network, i, base_port + i)
             flow_commands(
                 i,
-                host_1,
-                host_2,
-                basic_port + i,
-                cc[i],
+                source_host,
+                destination_host,
+                base_port + i,
+                congestion_controls[i],
                 args.time - time_between_flows * i,
                 args.dir,
                 delay=i * time_between_flows,
             )
             flow = {
                 "index": i,
-                "send_filter": "src {} and dst {} and dst port {}".format(
-                    host_1["IP"], host_2["IP"], basic_port + i
-                ),
-                "receive_filter": "src {} and dst {} and src port {}".format(
-                    host_2["IP"], host_1["IP"], basic_port + i
-                ),
+                "send_filter": f"src {source_host['IP']} and dst {destination_host['IP']} and dst port {base_port + i}",
+                "receive_filter": f"src {destination_host['IP']} and dst {source_host['IP']} and src port {base_port + i}",
                 "monitor": None,
             }
-            flow["filter"] = '"({}) or ({})"'.format(
-                flow["send_filter"], flow["receive_filter"]
-            )
+            flow["filter"] = f'"{flow["send_filter"]} or {flow["receive_filter"]}"'
             if experiment_monitor:
-                print(
-                    "########################### Found A Monitor ###########################"
-                )
-                flow["monitor"] = experiment_monitor(nw, i, basic_port + i)
+                print("########################### Found A Monitor ###########################")
+                flow["monitor"] = experiment_monitor(network, i, base_port + i)
             else:
-                print(
-                    "########################### Not Found ###########################"
-                )
+                print("########################### Not Found ###########################")
             flows.append(flow)
 
-        s = sched.scheduler(time, sleep)
-        for i in range(number_of_flows):
-            s.enter(i * time_between_flows, 1, start_experiment, (i,))
-        s.run()
+        scheduler = sched.scheduler(time, sleep)
+        for i in range(num_flows):
+            scheduler.enter(i * time_between_flows, 1, start_single_flow, (i,))
+        scheduler.run()
         return flows
 
-    def run(action):
+    def run_network_action(action_fn):
         """
-        Execute the specified action.
+        Execute the specified action function on the network.
 
         Parameters:
-        - action: Function representing the action to be performed.
+        - action_fn: Function representing the action to be performed.
         """
         if not os.path.exists(args.dir):
             os.makedirs(args.dir)
 
-        net = build_topology(args)
-        action(net)
+        network_config = build_topology(args)
+        action_fn(network_config)
 
-    def figure5(net):
+    def figure5_experiment(network):
         """Run the Figure 5 experiment."""
 
-        def pinger(name):
+        def configure_pinger(name):
             """
-            Start a ping train between two hosts for a specified duration.
+            Configure and return a ping function between two hosts for a specified duration.
 
             Parameters:
             - name: Name of the ping configuration.
             """
 
-            def ping_fn(net, i, port):
-                start_ping(net, args.time, "{}_rtt.txt".format(name), args)
+            def ping_function(net, i, port):
+                start_ping(net, args.time, f"{name}_rtt.txt", args)
 
-            return ping_fn
+            return ping_function
 
-        cap = start_capture("{}/capture_bbr.dmp".format(args.dir))
+        capture_bbr = start_capture(f"{args.dir}/capture_bbr.dmp")
 
-        flows = start_flows(
-            net, 1, 0, args.flow_type, ["bbr"], pre_experiment_action=pinger("bbr")
+        flows_bbr = setup_iperf_flows(
+            network,
+            1,
+            0,
+            args.flow_type,
+            ["bbr"],
+            pre_experiment_action=configure_pinger("bbr"),
         )
         display_countdown(args.time + 5)
 
         Popen("killall tcpdump", shell=True)
-        cap.join()
+        capture_bbr.join()
         filter_capture(
-            flows[0]["filter"],
-            "{}/capture_bbr.dmp".format(args.dir),
-            "{}/flow_bbr.dmp".format(args.dir),
+            flows_bbr[0]["filter"],
+            f"{args.dir}/capture_bbr.dmp",
+            f"{args.dir}/flow_bbr.dmp",
         )
-        cap = start_capture("{}/capture_cubic.dmp".format(args.dir))
 
-        flows = start_flows(
-            net, 1, 0, args.flow_type, ["cubic"], pre_experiment_action=pinger("cubic")
+        capture_cubic = start_capture(f"{args.dir}/capture_cubic.dmp")
+
+        flows_cubic = setup_iperf_flows(
+            network,
+            1,
+            0,
+            args.flow_type,
+            ["cubic"],
+            pre_experiment_action=configure_pinger("cubic"),
         )
         display_countdown(args.time + 5)
 
         Popen("killall tcpdump", shell=True)
-        cap.join()
+        capture_cubic.join()
         filter_capture(
-            flows[0]["filter"],
-            "{}/capture_cubic.dmp".format(args.dir),
-            "{}/flow_cubic.dmp".format(args.dir),
+            flows_cubic[0]["filter"],
+            f"{args.dir}/capture_cubic.dmp",
+            f"{args.dir}/flow_cubic.dmp",
         )
 
-    run(figure5)
+    run_network_action(figure5_experiment)
 
 
 # Example usage:
