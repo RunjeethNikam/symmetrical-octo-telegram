@@ -4,7 +4,7 @@ from multiprocessing import Process
 DEFAULT_DIR = "."
 
 
-def capture_packets(options="", filename=f"{DEFAULT_DIR}/capture.dmp", runner=None):
+def capture_packets(options="", filename=f"{DEFAULT_DIR}/record.dmp", runner=None):
     """
     Capture packets using tcpdump.
 
@@ -22,7 +22,7 @@ def capture_packets(options="", filename=f"{DEFAULT_DIR}/capture.dmp", runner=No
     return runner(command, shell=True).wait()
 
 
-def start_capture(output_file="capture.dmp"):
+def start_capture(output_file="record.dmp"):
     """
     Start capturing packets in a separate process.
 
@@ -37,7 +37,7 @@ def start_capture(output_file="capture.dmp"):
     return monitor
 
 
-def filter_capture(filter_expression, input_file="capture.dmp", output_file="filtered.dmp"):
+def filter_capture(filter_expression, input_file="record.dmp", output_file="queried.dmp"):
     """
     Filter captured packets using tcpdump in a separate process.
 
