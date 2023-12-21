@@ -1,7 +1,7 @@
 import socket
 import subprocess
 
-def get_local_ip_address(test_destination='8.8.8.8', port=80):
+def get_local_ip_address(test_destination, port=80):
     """
     Get the local machine's IP address.
 
