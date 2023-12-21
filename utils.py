@@ -1,20 +1,20 @@
 import os
 import json
-from subprocess import Popen
+from subprocess import Popen as Pn
 from multiprocessing import Process
 
 from ip_utils import get_ip_address, start_ping
 
 def build_topology(args):
-    def create_runner(popen, noproc=False):
-        def run_command(command, background=False, daemon=True):
-            if noproc:
-                process = popen(command, shell=True)
+    def create_runner(popen, np=False):
+        def execute_command(cmd, background=False, daemon=True):
+            if np:
+                process = Pn(cmd, shell=True)
                 if not background:
                     return process.wait()
 
             def start_command():
-                popen(command, shell=True).wait()
+                Pn(cmd, shell=True).wait()
 
             process = Process(target=start_command)
             process.daemon = daemon
@@ -23,20 +23,20 @@ def build_topology(args):
                 process.join()
             return process
 
-        return run_command
+        return execute_command
 
     def ssh_popen(command, *args, **kwargs):
         user = os.environ.get("SUDO_USER", os.environ["USER"])
         host_ip = data["h2"]["IP"]
         full_command = f"ssh -o StrictHostKeyChecking=no -i /home/{user}/.ssh/id_rsa {user}@{host_ip} 'sudo bash -c {json.dumps(command)}'"
         kwargs["shell"] = True
-        return Popen(full_command, *args, **kwargs)
+        return Pn(full_command, *args, **kwargs)
 
     data = {
         "type": "emulator",
         "h1": {
             "IP": get_ip_address(args.dest_ip),
-            "popen": Popen,
+            "popen": Pn,
         },
         "h2": {
             "IP": args.dest_ip,
@@ -45,8 +45,8 @@ def build_topology(args):
         "obj": None,
     }
 
-    h2_runner = create_runner(data["h2"]["popen"], noproc=False)
-    h1_runner = create_runner(data["h1"]["popen"], noproc=False)
+    h2_runner = create_runner(data["h2"]["popen"], np=False)
+    h1_runner = create_runner(data["h1"]["popen"], np=False)
 
     pipe_filter = (
         "tc qdisc del dev {iface} root; "
@@ -77,7 +77,7 @@ def build_topology(args):
         "sudo ethtool -K ens4 gso off tso off gro off; "
     )
 
-    data["h1"]["runner"] = create_runner(data["h1"]["popen"], noproc=False)
-    data["h2"]["runner"] = create_runner(data["h2"]["popen"], noproc=False)
+    data["h1"]["runner"] = create_runner(data["h1"]["popen"], np=False)
+    data["h2"]["runner"] = create_runner(data["h2"]["popen"], np=False)
 
     return data
