@@ -1,39 +1,40 @@
 import socket
+import subprocess
 
-
-def get_ip_address(test_destination):
+def get_local_ip_address(test_destination='8.8.8.8', port=80):
     """
-    Get the IP address of the local machine.
+    Get the local machine's IP address.
 
     Parameters:
-    - test_destination: A destination used to determine the local IP address.
+    - test_destination: A destination used to determine the local IP address (default is Google's public DNS).
+    - port: Port number for the test destination (default is 80).
 
     Returns:
     - The local IP address.
     """
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect((test_destination, 80))
-    return s.getsockname()[0]
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.connect((test_destination, port))
+        return s.getsockname()[0]
 
-
-def start_ping(nw, time, fname, args):
+def start_ping(host1, host2, duration=60, output_filename="ping_results.txt", directory="."):
     """
     Start a ping train between two hosts for a specified duration.
 
     Parameters:
-    - net: Network configuration.
-    - time: Duration of the ping train in seconds.
-    - fname: Output filename for ping results.
+    - host1: IP address or hostname of the first host.
+    - host2: IP address or hostname of the second host.
+    - duration: Duration of the ping train in seconds (default is 60).
+    - output_filename: Output filename for ping results (default is "ping_results.txt").
+    - directory: Output directory for the ping results file (default is the current directory).
     """
-    h1 = nw["h1"]
-    h2 = nw["h2"]
+    ping_command = f"ping -i 0.1 -c {int(duration * 10)} {host2}"
 
-    # Command to initiate ping
-    h1["runner"](
-        f"ping -i 0.1 -c {int(time * 10)} {h2['IP']} > {args.dir}/{fname}",
-        background=True,
-    )
+    output_path = f"{directory}/{output_filename}"
 
+    # Use subprocess to run the ping command in the background
+    subprocess.run(ping_command, shell=True, stdout=open(output_path, "w"))
 
 # Example usage:
-# start_ping(network_configuration, 60, "ping_results.txt")
+# local_ip = get_local_ip_address()
+# network_config = {"h1": {"IP": local_ip}, "h2": {"IP": "192.168.1.2"}}
+# start_ping(network_config["h1"]["IP"], network_config["h2"]["IP"])
