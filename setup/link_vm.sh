@@ -1,3 +1,3 @@
-source ./../settings.sh
-source create_vms.sh
-link_vms ${NAME1} ${NAME2} ${PROJECT} ${ZONE}
+source ./../configurations.sh
+source common_utils.sh
+link_vms ${HOST_1} ${HOST_2} ${GCLOUD_PROJECT} ${ZONE}

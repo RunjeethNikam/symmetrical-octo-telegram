@@ -5,27 +5,35 @@ from matplotlib.ticker import LinearLocator
 from pylab import figure
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--files', '-f', help="Ping output files to plot", required=True, action="store", nargs='+')
+parser.add_argument(
+    "--files",
+    "-f",
+    help="Ping output files to plot",
+    required=True,
+    action="store",
+    nargs="+",
+)
 
-parser.add_argument('--xlimit', help="Upper limit of x axis, data after ignored", type=float, default=8)
+parser.add_argument(
+    "--xlimit", help="Upper limit of x axis, data after ignored", type=float, default=8
+)
 
-parser.add_argument('--out', '-o', help="Output png file for the plot.", default=None)
+parser.add_argument("--out", "-o", help="Output png file for the plot.", default=None)
 
 args = parser.parse_args()
 
-m.rc('figure', figsize=(32, 12))
+m.rc("figure", figsize=(32, 12))
 fig = figure()
 ax = fig.add_subplot(111)
 for i, f in enumerate(args.files):
     data = read_list(f)
-    print('##############################')
+    print("##############################")
     print(data)
-    print('##############################')
+    print("##############################")
     xaxis = list(map(float, col(0, data)))
     rtts = list(map(float, col(1, data)))
     xaxis = [x - xaxis[0] for x in xaxis]
-    rtts = [r * 1000 for j, r in enumerate(rtts)
-            if xaxis[j] <= args.xlimit]
+    rtts = [r * 1000 for j, r in enumerate(rtts) if xaxis[j] <= args.xlimit]
     xaxis = [x for x in xaxis if x <= args.xlimit]
     if "bbr" in args.files[i]:
         name = "bbr"
