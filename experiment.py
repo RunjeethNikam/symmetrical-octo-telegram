@@ -114,7 +114,7 @@ def run_experiment(args):
 
             return ping_function
 
-        capture_bbr = start_capture(f"{args.dir}/capture_bbr.dmp")
+        capture_bbr = start_capture(f"{args.dir}/bbr-packets.dmp")
 
         flows_bbr = setup_iperf_flows(
             network,
@@ -130,11 +130,11 @@ def run_experiment(args):
         capture_bbr.join()
         filter_capture(
             flows_bbr[0]["filter"],
-            f"{args.dir}/capture_bbr.dmp",
-            f"{args.dir}/flow_bbr.dmp",
+            f"{args.dir}/bbr-packets.dmp",
+            f"{args.dir}/sanitized-bbr.dmp",
         )
 
-        capture_cubic = start_capture(f"{args.dir}/capture_cubic.dmp")
+        capture_cubic = start_capture(f"{args.dir}/cubic-packets.dmp")
 
         flows_cubic = setup_iperf_flows(
             network,
@@ -150,8 +150,8 @@ def run_experiment(args):
         capture_cubic.join()
         filter_capture(
             flows_cubic[0]["filter"],
-            f"{args.dir}/capture_cubic.dmp",
-            f"{args.dir}/flow_cubic.dmp",
+            f"{args.dir}/cubic-packets.dmp",
+            f"{args.dir}/sanitized-cubic.dmp",
         )
 
     run_network_action(figure5_experiment)
