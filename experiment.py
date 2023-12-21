@@ -47,7 +47,7 @@ def run_experiment(args):
         destination_host = network["h2"]
 
         flows = []
-        base_port = 1234
+        base_port = 9999
 
         print("Setting up the Iperf configuration")
         iperf_conf_setup(destination_host, base_port)
@@ -67,8 +67,8 @@ def run_experiment(args):
             )
             flow = {
                 "index": i,
-                "send_filter": f"src {source_host['IP']} and dst {destination_host['IP']} and dst port {base_port + i}",
-                "receive_filter": f"src {destination_host['IP']} and dst {source_host['IP']} and src port {base_port + i}",
+                "send_filter": f"dst port {base_port + i} and dst {destination_host['IP']} and src {source_host['IP']}",
+                "receive_filter": f"src port {base_port + i} and src {destination_host['IP']} and dst {source_host['IP']}",
                 "monitor": None,
             }
             flow["filter"] = f'"{flow["send_filter"]} or {flow["receive_filter"]}"'
@@ -78,11 +78,11 @@ def run_experiment(args):
             else:
                 print("########################### Not Found ###########################")
             flows.append(flow)
-
-        scheduler = sched.scheduler(time, sleep)
-        for i in range(num_flows):
-            scheduler.enter(i * time_between_flows, 1, start_single_flow, (i,))
-        scheduler.run()
+        sdl = sched.scheduler(time, sleep)
+        
+        for index in range(num_flows):
+            sdl.enter(index * time_between_flows, 1, start_single_flow, (index,))
+        sdl.run()
         return flows
 
     def run_network_action(action_fn):
